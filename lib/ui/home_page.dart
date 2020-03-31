@@ -1,9 +1,11 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:agenda_contatos/ui/contact_page.dart';
 import 'package:flutter/material.dart';
 import 'package:agenda_contatos/helpers/contact_helper.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+enum OrderOptions { orderaz, orderza }
 
 class HomePage extends StatefulWidget {
   @override
@@ -22,10 +24,44 @@ class _HomePageState extends State<HomePage> {
     _getAllContacts();
   }
 
+  void _orderList(OrderOptions result) {
+    setState(() {
+      switch (result) {
+        case OrderOptions.orderaz:
+          contacts.sort((a, b) {
+            return a.nome.toLowerCase().compareTo(b.nome.toLowerCase());
+          });
+          break;
+        case OrderOptions.orderza:
+          contacts.sort((a, b) {
+            return b.nome.toLowerCase().compareTo(a.nome.toLowerCase());
+          });
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: <Widget>[
+          PopupMenuButton<OrderOptions>(
+            itemBuilder: (context) => <PopupMenuEntry<OrderOptions>>[
+              const PopupMenuItem<OrderOptions>(
+                child: Text('Ordernar A-Z'),
+                value: OrderOptions.orderaz,
+              ),
+              const PopupMenuItem<OrderOptions>(
+                child: Text('Ordernar Z-A'),
+                value: OrderOptions.orderza,
+              )
+            ],
+            onSelected: _orderList,
+          )
+        ],
         title: Text('Contatos'),
         centerTitle: true,
         backgroundColor: Colors.red,
@@ -121,7 +157,10 @@ class _HomePageState extends State<HomePage> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: FlatButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          launch('tel:${contacts[index].telefone}');
+                          Navigator.pop(context);
+                        },
                         child: Text(
                           'Ligar',
                           style: TextStyle(color: Colors.red, fontSize: 20.0),
@@ -147,7 +186,7 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () {
                           helper.deleteContact(contacts[index].id);
                           setState(() {
-                            contacts.removeAt(index);  
+                            contacts.removeAt(index);
                           });
                           Navigator.pop(context);
                         },

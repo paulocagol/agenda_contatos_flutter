@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:agenda_contatos/helpers/contact_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ContactPage extends StatefulWidget {
   final Contact contact;
@@ -61,6 +62,15 @@ class _ContactPageState extends State<ContactPage> {
           child: Column(
             children: <Widget>[
               GestureDetector(
+                onTap: () {
+                  ImagePicker.pickImage(source: ImageSource.camera)
+                      .then((file) {
+                    if (file == null) return;
+                    setState(() {
+                      _editContact.imagem = file.path;
+                    });
+                  });
+                },
                 child: Container(
                   width: 140.0,
                   height: 140.0,
@@ -109,7 +119,7 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
-  Future<bool>_requestPop() {
+  Future<bool> _requestPop() {
     if (_userEdited) {
       showDialog(
         context: context,
@@ -118,13 +128,17 @@ class _ContactPageState extends State<ContactPage> {
             title: Text('Descartar Alterações?'),
             content: Text('Ao sair as alterações serão perdidas!'),
             actions: <Widget>[
-              FlatButton(onPressed: () {
-                Navigator.pop(context);
-              }, child: Text('Cancelar')),
-              FlatButton(onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-              }, child: Text('Sim'))
+              FlatButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancelar')),
+              FlatButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                  child: Text('Sim'))
             ],
           );
         },
